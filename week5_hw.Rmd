@@ -53,7 +53,7 @@ in the project you submit. Delete this note when before you submit your work.
 
 **Research quesion 1:**
 
-```{r}
+```{r fig.width=13, fig.height=4, echo=FALSE}
 df1<- brfss2013 %>% 
     select(X_ageg5yr, smokday2) %>% 
     filter(!is.na(smokday2)) %>% 
