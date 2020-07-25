@@ -1,0 +1,125 @@
+---
+title: "Smoking in several social dimensions"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+pacman::p_load(dplyr, ggplot2, kableExtra)
+```
+
+### Load data
+
+
+```{r load-data}
+setwd("H:\\LITERATURA_i_POBRANE\\R_kurs\\Cursera R\\week1_statysitical")
+load("brfss2013.gz")
+```
+
+
+
+* * *
+
+## Part 1: Data
+    
+#  relationship between age and smoking  -----------------
+
+    
+
+
+
+* * *
+
+## Part 2: Research questions
+
+# ASTMA i HAVY smookers
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button (green button with orange arrow) above. Make sure that your code is visible
+in the project you submit. Delete this note when before you submit your work.
+
+**Research quesion 1:**
+
+```{r}
+df1<- brfss2013 %>% 
+    select(X_ageg5yr, smokday2) %>% 
+    filter(!is.na(smokday2)) %>% 
+    mutate(smoker = ifelse(smokday2 == 'Not at all', 'No','Yes')) 
+
+
+ggplot()  + 
+    geom_bar(data = df1 ,aes(x = X_ageg5yr,  fill =  smoker), position = "dodge" ) +
+    labs(x = "",
+         y = "Number of smokers",
+         title = " Relationship between age and smoking") +
+    theme_minimal()+
+    theme(legend.title=element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+**Research quesion 2:**
+
+```{r}
+df2 <- brfss2013 %>% 
+    select(smoke100, asattack) %>% 
+    na.omit() %>% 
+    group_by(asattack, smoke100 ) %>% 
+    rename(`Asthma attack during past 12 month` = asattack, `Smoked At Least 100 Cigarettes` = smoke100) %>% 
+    summarise(`The numbers` = n()) %>% 
+    kable() %>%
+    kable_styling()
+df2
+
+
+
+```
+
+
+
+**Research quesion 3:**
+```{r}
+df3 <- brfss2013 %>% 
+    select(smokday2, exerhmm1, income2 ) %>% 
+    na.omit() %>% 
+    mutate( activity_level = cut(exerhmm1, breaks=c(1, 30, 60, 120, max(exerhmm1)), include.lowest = TRUE)) %>% 
+    mutate(smoker = ifelse(smokday2 == 'Not at all', 'No','Yes')) %>% 
+    select(income2, activity_level, smoker ) %>% 
+    group_by(activity_level, income2, smoker) %>% 
+    summarise( L = n()) %>% 
+    group_by(activity_level, income2) %>% 
+    mutate( L1 = sum(L)) %>% 
+    filter(smoker == 'Yes') %>% 
+    summarise(smokers_percentage = round( L / L1 * 100, 0 )) %>% 
+    arrange(income2, activity_level)
+
+
+
+ggplot(data = df3) +
+    geom_point(aes(x = activity_level, y = income2,  size = smokers_percentage)) +
+    theme_minimal()+
+    labs(x = "Activity time per week (in minutes)",
+         y = "Incame",
+         title = " Relationship between \n smoking, income and activity") +
+    # theme_minimal()+
+    theme( plot.title = element_text(hjust = 0.5)) +
+    scale_size(name = "Smokers percentage",
+               range = c(0, 10))
+ 
+```
+
